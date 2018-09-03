@@ -2,10 +2,7 @@
 title: API Reference
 
 language_tabs: # must be one of https://git.io/vQNgJ
-  - shell
-  - ruby
-  - python
-  - javascript
+  - shell: cURL
 
 toc_footers:
   - <a href='#'>Sign Up for a Developer Key</a>
@@ -64,6 +61,133 @@ Kittn expects for the API key to be included in all API requests to the server i
 <aside class="notice">
 You must replace <code>meowmeowmeow</code> with your personal API key.
 </aside>
+
+# Items
+
+`Item` objects stored information about buyers' requested items. Once created, these objects will be stored in both mongoDB and Elasticsearch. Shippers can search and view certain fields but only buyers have the permission to edit/delete items.
+
+Field | Type | Description
+----- | ---- | -----------
+_id | ObjectId | Unique identifier for the object.
+name | string | The item's name, meant to be displayable to shippers.
+description | string | The item's description, meant to be displayable to shippers.
+buyer | ObjectId | Unique identifier of the person who requested the item.
+price | number | The item's price, meant to be displayable to shippers. This price does not include shipper fee and Primor's charge.
+requiredDate | number | Latest date buyer wish to receive the item, meant to be displayable to shippers.
+shipperCountry | string | Country in which the item is available for purchase, meant to be available to shippers.
+status | number | Current status of the item.
+
+## Create an item
+
+Create a new item object.
+
+### HTTP Request
+
+`POST /protected/items`
+
+### Parameters
+
+Field | Type | Description
+-------- | ---- | -----------
+name | string | The item's name, meant to be displayable to shippers.
+description | string | The item's description, meant to be displayable to shippers.
+buyer | string | Unique identifier of the person who requested the item.
+price | number | The item's price, meant to be displayable to shippers. This price does not include shipper fee and Primor's charge.
+requiredDate | number | Latest date buyer wished to receive the item, meant to be displayable to shippers.
+shipperCountry | string | Country in which the item is available for purchase, meant to be available to shippers.
+status | number | Current status of the item.
+
+### Return
+
+Return the new `itemId` if create succeeded. Otherwise return return an `Error`.
+
+### Errors
+
+Error code | Description
+---------- | -----------
+400 | At least one of the required fields is missing.
+500 | Either mongoDB or Elasticsearch fail to create item. 
+
+## Edit an item
+
+Edit an existing item object. The function should be called with at least one of the fields specified.
+
+### HTTP Request
+`PUT /protected/items/:id`
+
+### Parameters
+
+Field | Type | Description
+-------- | ---- | -----------
+id | string | Unique identifier for the item.
+name | string | The item's name, meant to be displayable to shippers.
+description | string | The item's string, meant to be displayable to shippers.
+price | number | The item's price, meant to be displayable to shippers.
+requiredDate | number | Latest date buyer wish to receive the item, meant to be displayable to shippers.
+shipperCountry | string | Country in which the item is available for purchase, meant to be available to shippers.
+
+### Return
+
+Return a response with status code 200 if edit succeeded. Otherwise return an `Error`.
+
+### Errors
+
+Error code | Description
+---------- | -----------
+500 | Either mongoDB or Elasticsearch fail to edit item.
+
+## Delete an item
+
+Delete an existing item object.
+
+### HTTP Request
+
+`DELETE /protected/items/:id`
+
+### Parameters
+
+Field | Type | Description 
+-------- | ---- | -----------
+id | string | Unique identifier for the item.
+
+### Return
+
+Return a response with status code 200 if delete succeeded. Otherwise return an<br> `Error`.
+
+### Errors
+
+Error code | Description
+---------- | -----------
+500 | Either mongoDB or Elasticsearch fail to delete item.
+
+## Search items
+
+Find items that match certain criterias.
+
+### HTTP Request
+
+`POST /protected/search`
+
+### Parameters
+
+Field | Type | Description
+-------- | ---- | -----------
+minPrice | number | Minimum item price. Items must have `price` greater or equal `minPrice` in order to be returned as search result.
+maxPrice | number | Maximum item price. Items must have `price` smaller or equal `maxPrice` in order to be returned as search result.
+minDate | number | Earliest possible `requiredDate`. Items must have `requiredDate` greater or equal `minDate` in order to be returned as search result.
+maxDate | number | Latest possible `requiredDate`. Items must have `requiredDate` smaller or equal `maxDate` in order to be returned as search result.
+shipperCountry | string | Country in which the item is available for purchase. Items must have matching `shipperCountry` in order to be returned as search result.
+
+### Return
+
+Return an array of items matching search criterias if succeeded. If no items match the criterias, return empty array. If Elasticsearch fails, return an `Error`.
+
+### Errors
+
+Error code | Description
+---------- | -----------
+500 | Elasticsearch fails. 
+
 
 # Kittens
 
